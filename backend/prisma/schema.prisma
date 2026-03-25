@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Provider {
+  LOCAL
+  GITHUB
+  GOOGLE
+}
+
+enum Stage {
+  DEV
+  SECURITY
+  DEPLOY
+  PRODUCTION
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String?   @unique
+  passwordHash  String?
+  name          String
+  avatarUrl     String?
+  provider      Provider  @default(LOCAL)
+  providerId    String?
+  emailVerified Boolean   @default(false)
+  resetToken    String?
+  resetExpiry   DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  ReviewSessions ReviewSession[]
+  RefreshTokens  RefreshToken[]
+}
+
+model ReviewSession {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language    String
+  codeSnippet String   
+  filename    String?
+  createdAt   DateTime @default(now())
+
+  reports     ReviewReport[]
+}
+
+model ReviewReport {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId    String        @db.ObjectId
+  session      ReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  overallScore Int           @default(0)
+  stage        Stage
+  findings     Json          // Array of finding objects
+  suggestions  Json          // Array of fix suggestion objects
+  createdAt    DateTime      @default(now())
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+}
