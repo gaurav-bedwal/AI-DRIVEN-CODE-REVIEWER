@@ -25,6 +25,7 @@ app.use(passport.initialize());
 app.use('/api/auth', authRoutes);
 app.use('/api/review', verifyJWT, reviewRoutes);
 
+app.get('/', (req, res) => res.status(200).json({ message: 'AI Code Reviewer API is running!' }));
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 
 const PORT = process.env.PORT || 4000;
