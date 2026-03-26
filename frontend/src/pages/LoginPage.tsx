@@ -31,7 +31,11 @@ export default function LoginPage() {
         navigate('/review');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Authentication failed');
+      if (!error.response) {
+        toast.error('Network Error: Unable to reach the server.');
+      } else {
+        toast.error(error.response?.data?.error || 'Authentication failed');
+      }
     } finally {
       setLoading(false);
     }

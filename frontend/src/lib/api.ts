@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   withCredentials: true,
 });
 
@@ -24,7 +24,7 @@ api.interceptors.response.use(
     if (error.response?.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const { data } = await axios.post(`${api.defaults.baseURL}/api/auth/refresh`, {}, { withCredentials: true });
+        const { data } = await axios.post(`${api.defaults.baseURL || ''}/api/auth/refresh`, {}, { withCredentials: true });
         useAuthStore.getState().setAuth(useAuthStore.getState().user!, data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
